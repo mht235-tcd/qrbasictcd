@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scanner QR Code</title>
+    <link rel="manifest" href="manifest.json">
+</head>
+<body>
+    <h1>Scanner un QR Code</h1>
+    <video id="preview" style="width: 100%; max-width: 400px; border: 1px solid #ccc;"></video>
+    <p>Code décodé : <span id="output"></span></p>
+    <button id="sendSMS">Envoyer par SMS</button>
+
+    <script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
+    <script>
+        const video = document.querySelector("#preview");
+        const output = document.querySelector("#output");
+        const sendSMS = document.querySelector("#sendSMS");
+
+        function startScanner() {
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(stream => {
+                    video.srcObject = stream;
+                    video.play();
+
+                    const qrScanner = new Html5QrcodeScanner(
+                        "preview", { fps: 10, qrbox: 250 }
+                    );
+                    qrScanner.render((decodedText) => {
+                        output.textContent = decodedText;
+                    });
+                })
+                .catch(console.error);
+        }
+
+        sendSMS.addEventListener("click", () => {
+            const code = output.textContent;
+            if (code) {
+                // Utiliser un lien SMS pour envoyer
+                window.location.href = `sms:+23563893258?body=${encodeURIComponent(code)}`;
+            } else {
+                alert("Veuillez scanner un QR code avant d'envoyer !");
+            }
+        });
+
+        startScanner();
+    </script>
+</body>
+</html>
